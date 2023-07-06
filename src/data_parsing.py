@@ -1,6 +1,7 @@
 import csv
 import json
 import ast
+import sys
 
 
 print("Starting...")
@@ -34,7 +35,13 @@ def extract_info(log_entry):
     return [file_id, action, file_size, file_type, user_id, timestamp, file_path]
 
 
-with open("rawdata-0425.csv", "r") as infile, open(
+if len(sys.argv) < 2:
+    print("Please provide the input filename as a command-line argument.")
+    sys.exit()
+
+input_filename = sys.argv[1]
+
+with open(input_filename, "r") as infile, open(
     "output.csv", "w", newline=""
 ) as outfile:
     reader = csv.reader(infile)
@@ -59,13 +66,13 @@ with open("rawdata-0425.csv", "r") as infile, open(
         # current_row = i
         # if i == 0:
         #     continue
-        if i == -1:  # Use this to limit the number of lines to read.
+        if i == 100:  # Use this to limit the number of lines to read.
             break
         else:
             for i in range(len(row)):
                 row[i] = json.dumps(ast.literal_eval(row[i]))  # Convert string to dict
-                log_entry = row[0]  # Assuming the log entry is in the first column
+                log_entry = row[i]  # Assuming the log entry is in the first column
                 extracted_info = extract_info(log_entry)
                 writer.writerow(extracted_info)
 
-print("done!")
+print("Done!")
