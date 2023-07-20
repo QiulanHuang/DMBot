@@ -18,7 +18,11 @@ def extract_info(log_entry):
         # print("file id not found. Error occuring with this log entry:" + log_entry)
         file_id = "unknown"
 
-    action = log_data["_source"]["event"]["action"]
+    try:
+        action = log_data["_source"]["event"]["action"]
+    except:
+        # print("action not found. Error occuring with this log entry:" + log_entry)
+        action = "unknown"
 
     try:
         file_size = log_data["_source"]["dcache"]["billing"]["file"]["size"]
@@ -26,30 +30,51 @@ def extract_info(log_entry):
         # print("file size not found. Error occuring with this log entry:" + log_entry)
         file_size = "unknown"
 
-    file_type = log_data["_source"]["dcache"]["billing"]["storage"]["class"]
+    try:
+        file_type = log_data["_source"]["dcache"]["billing"]["storage"]["class"]
+    except:
+        # print("file type not found. Error occuring with this log entry:" + log_entry)
+        file_type = "unknown"
 
     try:
         user_id = log_data["_source"]["dcache"]["billing"]["client"]["user"]["id"]
     except:
+        # print("user id not found. Error occuring with this log entry:" + log_entry)
         user_id = "unknown"
 
-    timestamp = log_data["_source"]["dcache"]["billing"]["ts"]
+    try:
+        timestamp = log_data["_source"]["dcache"]["billing"]["ts"]
+    except:
+        # print("timestamp not found. Error occuring with this log entry:" + log_entry)
+        timestamp = "unknown"
 
-    file_path = log_data["_source"]["dcache"]["billing"]["protocol"]["path"]
+    try:
+        file_path = log_data["_source"]["dcache"]["billing"]["protocol"]["path"]
+    except:
+        # print("file path not found. Error occuring with this log entry:" + log_entry)
+        file_path = "unknown"
 
     try:
         group_id = log_data["_source"]["dcache"]["billing"]["client"]["user"]["group"][
             "id"
         ]
     except:
-        # print("group id not found. Error occuring with this log entry:" + log_entry)
+        print("group id not found. Error occuring with this log entry:" + log_entry)
         group_id = "unkown"
 
     try:
         client = log_data["_source"]["dcache"]["billing"]["client"]["address"]
     except:
-        # print("client not found. Error occuring with this log entry:" + log_entry)
-        client = "unkown"
+        try:
+            client = log_data["_source"]["destination"]["address"]
+        except:
+            try:
+                client = log_data["_source"]["source"]["address"]
+            except:
+                print(
+                    "client not found. Error occuring with this log entry:" + log_entry
+                )
+                client = "unkown"
 
     return [
         timestamp,
@@ -104,7 +129,7 @@ with open(input_filename, "r") as infile, open(
         # current_row = i
         # if i == 0:
         #     continue
-        if i == -1:  # Use this to limit the number of lines to read.
+        if i == 100:  # Use this to limit the number of lines to read.
             break
         else:
             for i in range(len(row)):
