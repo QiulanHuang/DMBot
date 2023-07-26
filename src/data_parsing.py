@@ -59,7 +59,7 @@ def extract_info(log_entry):
             "id"
         ]
     except:
-        print("group id not found. Error occuring with this log entry:" + log_entry)
+        # print("group id not found. Error occuring with this log entry:" + log_entry)
         group_id = "unkown"
 
     try:
@@ -71,9 +71,9 @@ def extract_info(log_entry):
             try:
                 client = log_data["_source"]["source"]["address"]
             except:
-                print(
-                    "client not found. Error occuring with this log entry:" + log_entry
-                )
+                # print(
+                #     "client not found. Error occuring with this log entry:" + log_entry
+                # )
                 client = "unkown"
 
     return [
@@ -125,21 +125,22 @@ with open(input_filename, "r") as infile, open(
     progress_bar = tqdm(total=file_size, unit="B", unit_scale=True)
 
     for i, row in enumerate(reader):
-        progress_bar.set_description("Processing row %i" % i)
-        # current_row = i
-        # if i == 0:
-        #     continue
-        if i == 100:  # Use this to limit the number of lines to read.
-            break
-        else:
-            for i in range(len(row)):
-                row[i] = json.dumps(ast.literal_eval(row[i]))  # Convert string to dict
-                log_entry = row[i]  # Assuming the log entry is in the first column
-                extracted_info = extract_info(log_entry)
-                writer.writerow(extracted_info)
+        if i > -1:  # Use this to set start point
+            progress_bar.set_description("Processing row %i" % i)
+            if i == -1:  # Use this to limit the number of lines to read.
+                print("Reached the limit of lines to read.")
+                break
+            else:
+                for i in range(len(row)):
+                    row[i] = json.dumps(
+                        ast.literal_eval(row[i])
+                    )  # Convert string to dict
+                    log_entry = row[i]  # Assuming the log entry is in the first column
+                    extracted_info = extract_info(log_entry)
+                    writer.writerow(extracted_info)
 
-        # update progress bar by the size of the data processed
-        progress_bar.update(sys.getsizeof(row))
+            # update progress bar by the size of the data processed
+            progress_bar.update(sys.getsizeof(row))
 
     progress_bar.close()
 
